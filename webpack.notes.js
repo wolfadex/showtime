@@ -4,7 +4,8 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 module.exports = ({ isDev } = {}) => {
   return {
     mode: isDev ? 'development' : 'production',
-    entry: path.join(__dirname, 'src/index.js'),
+    entry: path.join(__dirname, 'src/notes.js'),
+    target: 'electron-renderer',
     output: {
       path: path.join(__dirname, 'dist'),
       filename: 'bundle.js',
@@ -30,17 +31,17 @@ module.exports = ({ isDev } = {}) => {
         },
         {
           test: /\.css$/,
-          use: 'css-loader'
-        }
+          use: 'css-loader',
+        },
       ],
     },
     plugins: [
       new HtmlWebpackPlugin({
-        template: './src/index.html'
-      })
+        template: './src/notes.html',
+      }),
     ],
     devServer: {
-      port: 8000
-    }
+      port: 3000,
+    },
   };
 };

@@ -1,5 +1,12 @@
-module Show exposing (Show)
-
+module Show exposing
+    ( Background(..)
+    , Body(..)
+    , Code
+    , Content(..)
+    , Language
+    , Panel
+    , Show
+    )
 
 import Css exposing (Color)
 
@@ -32,6 +39,7 @@ type Content
 
 type Body
     = BodyText String
+    | BodyLink Url String
     | BodyList (List Body)
     | BodyImage String Float
     | BodyCode Language Code
@@ -42,4 +50,8 @@ type alias Language =
 
 
 type alias Code =
+    String
+
+
+type alias Url =
     String

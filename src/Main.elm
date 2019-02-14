@@ -13,7 +13,10 @@ import Html.Styled.Attributes as Attrs
 import Html.Styled.Keyed as Keyed
 import Html.Styled.Lazy as Lazy
 import Json.Decode as JD exposing (Decoder, Value)
+import Json.Encode as JE
 import List.Extra exposing (uncons)
+import Process
+import Show exposing (..)
 import SyntaxHighlight
 import Task
 
@@ -32,52 +35,6 @@ main =
 ---- TYPES ----
 
 
-type alias Show =
-    { title : String
-    , content : ( List Panel, Panel, List Panel )
-    , background : Background
-    }
-
-
-type alias Panel =
-    { id : String
-    , background : Background
-    , body : Content
-    , notes : List String
-    }
-
-
-type Background
-    = BackgroundColor Color
-    | BackgroundImage String
-
-
-type Content
-    = Titled String Body
-    | OnlyTitle String
-    | OnlyBody Body
-
-
-type Body
-    = BodyText String
-    | BodyLink Url String
-    | BodyList (List Body)
-    | BodyImage String Float
-    | BodyCode Language Code
-
-
-type alias Language =
-    String
-
-
-type alias Code =
-    String
-
-
-type alias Url =
-    String
-
-
 type alias Model =
     { show : Show
     , pointerDown : ( Float, Float )
@@ -91,6 +48,7 @@ type Msg
     | PointerDown ( Bool, Float, Float )
     | PointerUp ( Bool, Float, Float )
     | OpenNotes
+    | UpdateNotes
 
 
 
@@ -100,7 +58,7 @@ type Msg
 init : () -> ( Model, Cmd Msg )
 init _ =
     ( { show =
-            { title = "How to Carl"
+            { title = "elm"
             , background = BackgroundColor colorGray
             , content =
                 ( []
@@ -120,20 +78,86 @@ init _ =
                     }
                   , { id = "p3"
                     , background = BackgroundColor colorGreen
-                    , body = Titled "Functions" (BodyCode "elm" "add : Int -> Int -> Int\nadd a b =\n\ta + b")
-                    , notes = []
+                    , body = Titled "Functions" (BodyCode "elm" """add : Int -> Int -> Int
+add a b =
+    a + b""")
+                    , notes =
+                        [ "Everything is an expression"
+                        , "Pure: given the same input you always get the same output"
+                        , "Typed"
+                        ]
                     }
                   , { id = "p4"
                     , background = BackgroundColor colorGreen
-                    , body = Titled "Imports" (BodyCode "elm" "import MyModule\nimport YourModule as Your\nimport Html exposing (Html, div)")
-                    , notes = []
+                    , body = Titled "Types: Aliases" (BodyCode "elm" """type alias Url = String
+
+type alias Name = String""")
+                    , notes =
+                        [ "Still treated as a String"
+                        , "Prevents you from assigning a say a Name to a URL"
+                        , "Makes your code more clear. E.g. a function that take a Url and not any string"
+                        ]
                     }
-                  , { id = "p4"
+                  , { id = "p5"
                     , background = BackgroundColor colorGreen
-                    , body = Titled "Exports" (BodyCode "elm" "module Math exposing\n\t( add\n\t, subtract\n\t)")
-                    , notes = []
+                    , body = Titled "Types: Records" (BodyCode "elm" """type alias Person =
+    { name : String
+    , age : Int
+    }""")
+                    , notes =
+                        [ "Analagous to JavaScript objects"
+                        , "Not allowed to change the number of keys or their type at runtime"
+                        ]
                     }
-                  , { id = "p4"
+                  , { id = "p6"
+                    , background = BackgroundColor colorGreen
+                    , body = Titled "Types: Custom" (BodyCode "elm" """type Direction
+    = Left
+    | Right
+    | Up
+    | Down
+
+type Result err a
+    = Ok a
+    | Err err""")
+                    , notes =
+                        [ "Similar to enums"
+                        , "Can carry or contain data"
+                        , "A request returns a result, forced to handle the result"
+                        ]
+                    }
+                  , { id = "p7"
+                    , background = BackgroundColor colorGreen
+                    , body = Titled "Conditionals & Branching" (BodyCode "elm" """case someResult of
+    Ok value ->
+        -- Handle the value
+    Err err ->
+        -- Handle the error""")
+                    , notes = [ "Required to handle every case", "Catch all with underscore or named variable", "Also has if/else" ]
+                    }
+                  , { id = "p8"
+                    , background = BackgroundColor colorGreen
+                    , body = Titled "Imports" (BodyCode "elm" """import MyModule
+import YourModule as Your
+import Html exposing (Html, div)""")
+                    , notes =
+                        [ "Import just the module, access types and functions with module name dot function name"
+                        , "Rename modules on import"
+                        , "Expose types and functions, after the 'as' rename"
+                        ]
+                    }
+                  , { id = "p9"
+                    , background = BackgroundColor colorGreen
+                    , body = Titled "Exports" (BodyCode "elm" """module Math exposing
+    ( add
+    , subtract
+    )""")
+                    , notes =
+                        [ "Everything listed her becomes accesible by others that import your module"
+                        , "elm format alphabetizes these for you"
+                        ]
+                    }
+                  , { id = "p10"
                     , background = BackgroundColor colorGreen
                     , body = Titled "TEA: The Elm Architecture" (BodyList [ BodyText "Model", BodyText "View", BodyText "Update", BodyText "and Subscriptions" ])
                     , notes = []
@@ -141,6 +165,11 @@ init _ =
                   , { id = "p20"
                     , background = BackgroundColor colorRed
                     , body = Titled "Beautiful Errors???" (BodyLink "https://ellie-app.com/new" "Ellie")
+                    , notes = []
+                    }
+                  , { id = "demo"
+                    , background = BackgroundColor colorRed
+                    , body = Titled "Demo" (BodyLink "https://ellie-app.com/4K5kL48fxkQa1" "Photo App")
                     , notes = []
                     }
                   ]
@@ -160,6 +189,8 @@ subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch
         [ onKeyDown decodeKeyDown
+        , nextSlide (\_ -> NextPanel)
+        , previousSlide (\_ -> PreviousPanel)
         ]
 
 
@@ -201,8 +232,25 @@ keyDownToMessage key isRepeat =
 port openNotes : () -> Cmd msg
 
 
+port updateNotes : Value -> Cmd msg
+
+
+encodeNotes : List String -> Value
+encodeNotes =
+    JE.list JE.string
+
+
 
 --INCOMING
+
+
+port nextSlide : (Value -> msg) -> Sub msg
+
+
+port previousSlide : (Value -> msg) -> Sub msg
+
+
+
 ---- UPDATE ----
 
 
@@ -212,17 +260,51 @@ update msg model =
         NoOp ->
             ( model, Cmd.none )
 
+        UpdateNotes ->
+            let
+                ( past, present, future ) =
+                    model.show.content
+            in
+            ( model
+            , updateNotes <| encodeNotes present.notes
+            )
+
         OpenNotes ->
-            ( model, openNotes () )
+            let
+                ( past, present, future ) =
+                    model.show.content
+            in
+            ( model
+            , Cmd.batch
+                [ openNotes ()
+                , Process.sleep 800
+                    |> Task.andThen (always <| Task.succeed UpdateNotes)
+                    |> Task.perform identity
+                ]
+            )
 
         NextPanel ->
-            ( { model | show = nextPanel model.show }
-            , Cmd.none
+            let
+                nextShow =
+                    nextPanel model.show
+
+                ( past, present, future ) =
+                    nextShow.content
+            in
+            ( { model | show = nextShow }
+            , updateNotes <| encodeNotes present.notes
             )
 
         PreviousPanel ->
-            ( { model | show = previousPanel model.show }
-            , Cmd.none
+            let
+                nextShow =
+                    previousPanel model.show
+
+                ( past, present, future ) =
+                    nextShow.content
+            in
+            ( { model | show = nextShow }
+            , updateNotes <| encodeNotes present.notes
             )
 
         PointerDown ( isPrimary, x, y ) ->
