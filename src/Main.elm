@@ -66,8 +66,9 @@ init _ =
                   , background = BackgroundColor colorNone
                   , body = Titled "What is elm?" (BodyImage "./src/Elm_logo.svg.png" 3)
                   , notes =
-                        [ "According to its website, \"A delightful language for reliable webapps\""
-                        , "and, \"Delivers great performance with no runtime exceptions\""
+                        [ "According to its website, 'A delightful language for reliable webapps'"
+                        , "and, 'Delivers great performance with no runtime exceptions'"
+                        , "'Beginner' friendly, doesn't expect you to memorize obscure function names or syntax"
                         ]
                   }
                 , [ { id = "p2"
@@ -165,12 +166,54 @@ import Html exposing (Html, div)""")
                   , { id = "p20"
                     , background = BackgroundColor colorRed
                     , body = Titled "Beautiful Errors???" (BodyLink "https://ellie-app.com/new" "Ellie")
-                    , notes = []
+                    , notes =
+                        [ "https://elm-lang.org/blog/compiler-errors-for-humans"
+                        , "Shows you the code you wrote and what was expected, possibly a suggestion or hint"
+                        ]
                     }
                   , { id = "demo"
                     , background = BackgroundColor colorRed
                     , body = Titled "Demo" (BodyLink "https://ellie-app.com/4K5kL48fxkQa1" "Photo App")
-                    , notes = []
+                    , notes =
+                        [ "Http request"
+                        , "Decoding JSON to elm types"
+                        , "CSS"
+                        ]
+                    }
+                  , { id = "final1"
+                    , background = BackgroundColor <| Css.rgb 100 222 80
+                    , body =
+                        Titled "Parting Thoughts"
+                            (BodyList
+                                [ BodyText "Super small when comppiled"
+                                , BodyText "Unit and fuzz testing"
+                                , BodyText "\"After 2 years and 200,000 lines of production elm code, we got our first production runtime exception.\""
+                                ]
+                            )
+                    , notes =
+                        [ "Real world app (https://github.com/gothinkster/realworld) only 29 kb"
+                        , "Real world app is a Medium clone written in most languages"
+                        , "1 elm bug: (We [NoRedInk] wrote code that called Debug.crash and shipped it. That function does what it says on the tin. 😅)"
+                        , "elm won't compile to production code while you use the Debug module"
+                        ]
+                    }
+                  , { id = "final2"
+                    , background = BackgroundColor <| Css.rgb 100 222 80
+                    , body =
+                        Titled "Learn More"
+                            (BodyList
+                                [ BodyText "elm-lang.org"
+                                , BodyText "guide.elm-lang.org"
+                                , BodyText "ellie-app.com"
+                                , BodyText "Slack"
+                                ]
+                            )
+                    , notes =
+                        [ "website"
+                        , "main/basic guide"
+                        , "write basic examples/snippets for demos or sharing"
+                        , "Super friendly"
+                        ]
                     }
                   ]
                 )

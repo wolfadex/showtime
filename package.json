@@ -7,12 +7,14 @@
     "elm": "elm-live src/Main.elm -e node_modules/.bin/elm -- --debug",
     "dev:el": "NODE_ENV=development electron .",
     "dev:main": "webpack-dev-server --config ./webpack.main.js",
-    "dev:notes": "webpack-dev-server --config ./webpack.notes.js"
+    "dev:notes": "webpack-dev-server --config ./webpack.notes.js",
+    "present": "concurrently \"yarn dev:main\" \"yarn dev:notes\" \"yarn dev:el\""
   },
   "devDependencies": {
     "@babel/core": "^7.2.2",
     "@babel/preset-env": "^7.3.1",
     "babel-loader": "^8.0.5",
+    "concurrently": "^4.1.0",
     "css-loader": "^2.1.0",
     "elm": "^0.19.0-bugfix6",
     "elm-format": "^0.8.1",
