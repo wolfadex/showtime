@@ -64,11 +64,12 @@ init _ =
                 ( []
                 , { id = "p1"
                   , background = BackgroundColor colorNone
-                  , body = Titled "What is elm?" (BodyImage "./src/Elm_logo.svg.png" 3)
+                  , body = Titled "I got `NaN` problems but elm ain’t one" (BodyImage "./src/Elm_logo.svg.png" 3)
                   , notes =
                         [ "According to its website, 'A delightful language for reliable webapps'"
                         , "and, 'Delivers great performance with no runtime exceptions'"
                         , "'Beginner' friendly, doesn't expect you to memorize obscure function names or syntax"
+                        , "Borrowed the title from `erlandsona` on elmlang.slack.com #general"
                         ]
                   }
                 , [ { id = "p2"
@@ -173,7 +174,7 @@ import Html exposing (Html, div)""")
                     }
                   , { id = "demo"
                     , background = BackgroundColor colorRed
-                    , body = Titled "Demo" (BodyLink "https://ellie-app.com/4K5kL48fxkQa1" "Photo App")
+                    , body = Titled "Demo" (BodyLink "https://ellie-app.com/4QRN6mxQBZKa1" "Photo App")
                     , notes =
                         [ "Http request"
                         , "Decoding JSON to elm types"
